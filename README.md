@@ -9,19 +9,20 @@ This repository contains the official PyTorch implementation for a structurally 
 *(Note: To strictly comply with double-blind peer review policies, the exact paper title, full abstract, and author information have been temporarily removed. The complete details will be updated upon publication.)*
 
 ## 📊 Main Results (Top-K = 30)
-The following table presents the out-of-sample backtesting performance of our proposed TVGM compared to its ablated single-branch variants. 
 
-| Metric | TVGM (Hybrid) | ST-only | HAR-only |
-| :--- | :--- | :--- | :--- |
-| **Sharpe** | **2.2580 ± 1.4287** | 2.1275 ± 1.2327 | 1.2352 ± 0.6879 |
-| **CumRet** | **8.20% ± 3.43%** | 7.87% ± 3.37% | 6.16% ± 3.67% |
-| **AnnRet** | **15.76% ± 5.83%** | 15.17% ± 5.75% | 12.29% ± 6.63% |
-| **AnnVol** | 9.64% ± 4.30% | **9.58% ± 4.32%** | 11.92% ± 4.19% |
-| **MaxDD** | -4.59% ± 3.62% | **-4.53% ± 3.65%** | -7.02% ± 4.51% |
-| **P@K** | **56.76% ± 2.76%** | **56.76% ± 2.54%** | 53.97% ± 2.18% |
-| **LiftPct**| **3.70% ± 5.04%** | **3.70% ± 4.64%** | -1.40% ± 3.98% |
+The following table reports the out-of-sample backtesting performance of the full TVGM model (mean ± standard deviation across rolling evaluation folds).
 
-*(Note: The above results are evaluated on a dynamically rebalanced S&P 500 universe using a 4-fold rolling cross-validation protocol.)*
+| Metric | TVGM (Full Model) |
+| :--- | :--- |
+| **Sharpe** | **2.2580 ± 1.4287** |
+| **CumRet** | **8.20% ± 3.43%** |
+| **AnnRet** | **15.76% ± 5.83%** |
+| **AnnVol** | **9.64% ± 4.30%** |
+| **MaxDD** | **-4.59% ± 3.62%** |
+| **P@K** | **56.76% ± 2.76%** |
+| **LiftPct** | **3.70% ± 5.04%** |
+
+*Note: The reported results use a dynamically rebalanced S&P 500 stock universe and a four-fold rolling evaluation protocol.*
 
 ## 📂 Project Structure
 ```text
@@ -46,12 +47,12 @@ TVGM/
 ```
 # ⚙️ Installation
 
-1.Clone this repository:
+1. Clone this repository (replace `<REPOSITORY_URL>` with the actual GitHub clone URL):
 ```text
-git clone [https://github.com/AnonymousAuthor/TVGM.git](https://github.com/AnonymousAuthor/TVGM.git)
+git clone <REPOSITORY_URL>
 cd TVGM
 ```
-2.Install the required dependencies:
+2. Install the required dependencies:
 ```text
 pip install -r requirements.txt
 ```
@@ -76,17 +77,4 @@ Once the data is processed, you can train the TVGM model and evaluate it using t
 ```text
 python train.py --seq_len 20 --sparsity 0.08 --penalty 4.0 --epochs 15
 ```
-*(Note: Running ```python train.py``` without arguments will automatically execute the training loop using the optimal default hyperparameters: seq_len=20, sparsity=0.08, and penalty=4.0.)*
-
-# 🔬 Ablation Studies
-
-You can easily reproduce the ablation studies from the paper by specifying the --ablation_mode argument:
-1. Remove risk-averse penalty (Standard MSE)
-```text
-    python train.py --ablation_mode wo-risk
-```
-
-2. Remove pairwise ranking loss
-```text
-python train.py --ablation_mode wo-rank
-```
+*(Note: Running ```python train.py``` without arguments will automatically execute the training loop using the default hyperparameters: seq_len=20, sparsity=0.08, and penalty=4.0.)*

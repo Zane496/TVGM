@@ -91,8 +91,10 @@ def run_experiment(args):
                 optimizer.zero_grad()
 
                 loss, _, _ = risk_averse_loss(
-                    model(x, adj).squeeze(-1), y, mask,
-                    penalty_val=args.penalty, ablation_mode=args.ablation_mode
+                    model(x, adj).squeeze(-1),
+                    y,
+                    mask,
+                    penalty_val=args.penalty
                 )
 
                 loss.backward()
@@ -111,34 +113,47 @@ def run_experiment(args):
         gc.collect()
 
     # Aggregate results across folds
-    mean_results = {m: {} for m in ["hybrid", "st", "har"]}
-    std_results = {m: {} for m in ["hybrid", "st", "har"]}
-    for m_name in ["hybrid", "st", "har"]:
+    mean_results = {m: {} for m in ["hybrid"]}
+    std_results = {m: {} for m in ["hybrid"]}
+    for m_name in ["hybrid"]:
         for k in k_list:
             metrics_matrix = np.array([f[m_name][k] for f in fold_results])
             mean_results[m_name][k] = np.nanmean(metrics_matrix, axis=0)
             std_results[m_name][k] = np.nanstd(metrics_matrix, axis=0)
 
     # Print Final Academic Table (Ref_K = 30)
-    print(f"\n>>> 📊 Final Evaluation (Top-K = 30)")
-    print("-" * 105)
-    print(f"{'Metric':<10} | {'TVGM (Hybrid)':<25} | {'ST-only':<25} | {'HAR-only':<25}")
-    print("-" * 105)
+    print(f"\n>>> Final Evaluation (Top-K = 30)")
+    print("-" * 55)
+    print(f"{'Metric':<10} | {'TVGM (Mean ± Std)':<30}")
+    print("-" * 55)
 
-    metric_names = ["Sharpe", "CumRet", "AnnRet", "AnnVol", "MaxDD", "P@K", "LiftPct"]
+    metric_names = [
+        "Sharpe", "CumRet", "AnnRet",
+        "AnnVol", "MaxDD", "P@K", "LiftPct"
+    ]
     is_pct_list = [False, True, True, True, True, True, True]
 
     def fmt(m_val, s_val, is_pct):
-        if np.isnan(m_val): return "NaN"
-        return f"{m_val:.2%}±{s_val:.2%}" if is_pct else f"{m_val:.4f}±{s_val:.4f}"
+        if np.isnan(m_val):
+            return "NaN"
+        return (
+            f"{m_val:.2%}±{s_val:.2%}"
+            if is_pct
+            else f"{m_val:.4f}±{s_val:.4f}"
+        )
 
     for i, m_name in enumerate(metric_names):
         is_pct = is_pct_list[i]
-        val_h = fmt(mean_results["hybrid"][30][i], std_results["hybrid"][30][i], is_pct)
-        val_s = fmt(mean_results["st"][30][i], std_results["st"][30][i], is_pct)
-        val_a = fmt(mean_results["har"][30][i], std_results["har"][30][i], is_pct)
-        print(f"{m_name:<10} | {val_h:<25} | {val_s:<25} | {val_a:<25}")
-    print("-" * 105 + "\n")
+
+        val = fmt(
+            mean_results["hybrid"][30][i],
+            std_results["hybrid"][30][i],
+            is_pct
+        )
+
+        print(f"{m_name:<10} | {val:<30}")
+
+    print("-" * 55 + "\n")
 
 
 if __name__ == "__main__":
@@ -149,7 +164,6 @@ if __name__ == "__main__":
     parser.add_argument("--seq_len", type=int, default=20, help="Temporal sequence length")
     parser.add_argument("--sparsity", type=float, default=0.08, help="Graph sparsity target")
     parser.add_argument("--penalty", type=float, default=4.0, help="Risk aversion penalty weight")
-    parser.add_argument("--ablation_mode", type=str, default="full", choices=["full", "wo-risk", "wo-rank", "wo-mse"], help="Ablation testing mode")
 
     # System and Data configs
     parser.add_argument("--data_dir", type=str, default="data/processed", help="Path to preprocessed data")
